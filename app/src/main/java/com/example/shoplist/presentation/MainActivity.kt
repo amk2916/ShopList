@@ -17,6 +17,5 @@ class MainActivity : AppCompatActivity() {
         viewModel.shopList.observe(this){
             Log.e("shopList", it.toString())
         }
-        viewModel.getShopList()
     }
 }

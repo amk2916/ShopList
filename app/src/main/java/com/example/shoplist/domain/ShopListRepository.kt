@@ -1,5 +1,7 @@
 package com.example.shoplist.domain
 
+import androidx.lifecycle.LiveData
+
 //черный ящик для домаин слоя который умеет работать с данными
 //но реализация не важна
 interface ShopListRepository {
@@ -12,5 +14,5 @@ interface ShopListRepository {
 
     fun getShopItem(shopItemId: Int) : ShopItem
 
-    fun getShopList() : List<ShopItem>
+    fun getShopList() : LiveData<List<ShopItem>>
 }
