@@ -14,5 +14,6 @@ interface ShopListRepository {
 
     fun getShopItem(shopItemId: Int) : ShopItem
 
+    //возвращаем LiveData чтобы один раз подписаться на обновления
     fun getShopList() : LiveData<List<ShopItem>>
 }

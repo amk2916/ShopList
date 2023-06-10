@@ -9,6 +9,7 @@ import java.lang.RuntimeException
 //Логика репозитория
 //для ускорения , делаем пока без БД
 object ShopListRepositoryImpl : ShopListRepository {
+
     private val shopListLD = MutableLiveData<List<ShopItem>>()
 
     private val shopList = mutableListOf<ShopItem>()
