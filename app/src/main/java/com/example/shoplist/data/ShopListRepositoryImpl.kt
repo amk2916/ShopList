@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.example.shoplist.domain.ShopItem
 import com.example.shoplist.domain.ShopListRepository
 import java.lang.RuntimeException
+import java.util.Random
 
 //Логика репозитория
 //для ускорения , делаем пока без БД
@@ -12,14 +13,14 @@ object ShopListRepositoryImpl : ShopListRepository {
 
     private val shopListLD = MutableLiveData<List<ShopItem>>()
 
-    private val shopList = mutableListOf<ShopItem>()
+    private val shopList = sortedSetOf<ShopItem>({o1,o2 ->o1.id.compareTo(o2.id)})
 
     private var autoIncrementId = 0
 
     //Тестовые данные
     init {
-        for(i in 0.. 10){
-            val shopItem = ShopItem(name = "name_$i", count = 1, enabled = false)
+        for(i in 0.. 1000){
+            val shopItem = ShopItem(name = "name_$i", count = 1, enabled = Random().nextBoolean())
             addShopItem(shopItem)
         }
     }
