@@ -1,20 +1,25 @@
 package com.example.shoplist.presentation
 
-import android.media.MediaRouter.SimpleCallback
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoplist.R
-import com.example.shoplist.domain.ShopItem
+import com.example.shoplist.presentation.ShopItemActivity.Companion.newIntentItemAdd
+import com.example.shoplist.presentation.ShopItemActivity.Companion.newIntentItemEdit
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
 
     private lateinit var shopListAdapter: ShopListAdapter
+
+    private val floatingActionButton by lazy {
+        findViewById<FloatingActionButton>(R.id.button_add_shop_item)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -26,6 +31,13 @@ class MainActivity : AppCompatActivity() {
             //вычисления идут в другом потоке
             shopListAdapter.submitList(it)
         }
+
+        floatingActionButton.setOnClickListener {
+            val intent = newIntentItemAdd(this)
+            startActivity(intent)
+        }
+
+
     }
 
     private fun setupRecyclerView() {
@@ -75,7 +87,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         shopListAdapter.onShopItemClickListener = {
-            Log.e("clickElement", "click ${it.id}")
+            val intent = newIntentItemEdit(this, it.id)
+            startActivity(intent)
         }
     }
 
