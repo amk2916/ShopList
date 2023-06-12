@@ -14,14 +14,14 @@ import com.example.shoplist.domain.ShopItem
 import com.google.android.material.textfield.TextInputLayout
 
 class ShopItemActivity : AppCompatActivity() {
-
-    private lateinit var viewModel: ShopItemViewModel
-
-    private val tilName by lazy { findViewById<TextInputLayout>(R.id.til_name) }
-    private val tilCount by lazy { findViewById<TextInputLayout>(R.id.til_count) }
-    private val etName by lazy { findViewById<EditText>(R.id.et_name) }
-    private val etCount by lazy { findViewById<EditText>(R.id.et_count) }
-    private val buttonSave by lazy { findViewById<Button>(R.id.save_button) }
+//
+//    private lateinit var viewModel: ShopItemViewModel
+//
+//    private val tilName by lazy { findViewById<TextInputLayout>(R.id.til_name) }
+//    private val tilCount by lazy { findViewById<TextInputLayout>(R.id.til_count) }
+//    private val etName by lazy { findViewById<EditText>(R.id.et_name) }
+//    private val etCount by lazy { findViewById<EditText>(R.id.et_count) }
+//    private val buttonSave by lazy { findViewById<Button>(R.id.save_button) }
 
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
@@ -29,98 +29,76 @@ class ShopItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_shop_item)
+
         parseInten()
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
+
         launchRightMode()
-        installTextChangedListener()
-        observeViewModel()
 
+//        observeViewModel()
 
+//
     }
-
-    private fun observeViewModel() {
-        with(viewModel) {
-            errorInputName.observe(this@ShopItemActivity) {
-                val message = if (it) {
-                    "Error Name"
-                } else {
-                    null
-                }
-                tilName.error = message
-            }
-            errorInputCount.observe(this@ShopItemActivity) {
-                val message = if (it) {
-                    "Error Count"
-                } else {
-                    null
-                }
-                tilCount.error = message
-            }
-            shouldCloseScreen.observe(this@ShopItemActivity) {
-                finish()
-            }
-        }
-    }
-
-    private fun installTextChangedListener() {
-        etName.addTextChangedListener(object : TextWatcher {
-            //вероятно можно избавится от этого пустого кода
-            // пока непонятно как,todo: в процессе поискать
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.resetErrorInputName()
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-        })
-        etCount.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.resetErrorInputCount()
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-        })
-    }
-
+//
+//    private fun observeViewModel() {
+//        with(viewModel) {
+//            errorInputName.observe(this@ShopItemActivity) {
+//                val message = if (it) {
+//                    "Error Name"
+//                } else {
+//                    null
+//                }
+//                tilName.error = message
+//            }
+//            errorInputCount.observe(this@ShopItemActivity) {
+//                val message = if (it) {
+//                    "Error Count"
+//                } else {
+//                    null
+//                }
+//                tilCount.error = message
+//            }
+//            shouldCloseScreen.observe(this@ShopItemActivity) {
+//                finish()
+//            }
+//        }
+//    }
+//
+//
     private fun launchRightMode() {
-        when (screenMode) {
-            MODE_EDIT -> launchEditMode()
-            MODE_ADD -> launchAddMode()
+        val fragment = when (screenMode) {
+            MODE_EDIT -> ShopItemFragment.newInstanceEditItem(shopItemId)
+            MODE_ADD -> ShopItemFragment.newInstanceAddItem()
+            else -> throw RuntimeException("Unknown screen mode: $screenMode")
         }
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.shop_item_container, fragment)
+            .commit()
     }
-
-    private fun launchEditMode() {
-
-        with(viewModel) {
-            getShopItem(shopItemId)
-            shopItem.observe(this@ShopItemActivity) {
-                etName.setText(it.name)
-                etCount.setText(it.count.toString())
-            }
-
-            buttonSave.setOnClickListener {
-                editShopItem(etName.text?.toString(), etCount.text?.toString())
-            }
-        }
-
-
-    }
-
-    private fun launchAddMode() {
-        buttonSave.setOnClickListener {
-            viewModel.addShopItem(etName.text?.toString(), etCount.text?.toString())
-        }
-    }
-
+//
+//    private fun launchEditMode() {
+//
+//        with(viewModel) {
+//            getShopItem(shopItemId)
+//            shopItem.observe(this@ShopItemActivity) {
+//                etName.setText(it.name)
+//                etCount.setText(it.count.toString())
+//            }
+//
+//            buttonSave.setOnClickListener {
+//                editShopItem(etName.text?.toString(), etCount.text?.toString())
+//            }
+//        }
+//
+//
+//    }
+//
+//    private fun launchAddMode() {
+//        buttonSave.setOnClickListener {
+//            viewModel.addShopItem(etName.text?.toString(), etCount.text?.toString())
+//        }
+//    }
+//
     private fun parseInten() {
         //Если интент не содержит параметра скрин мод, то бросаем исключение
         if (!intent.hasExtra(EXTRA_SCREEN_MODE))
