@@ -13,15 +13,7 @@ import com.example.shoplist.R
 import com.example.shoplist.domain.ShopItem
 import com.google.android.material.textfield.TextInputLayout
 
-class ShopItemActivity : AppCompatActivity() {
-//
-//    private lateinit var viewModel: ShopItemViewModel
-//
-//    private val tilName by lazy { findViewById<TextInputLayout>(R.id.til_name) }
-//    private val tilCount by lazy { findViewById<TextInputLayout>(R.id.til_count) }
-//    private val etName by lazy { findViewById<EditText>(R.id.et_name) }
-//    private val etCount by lazy { findViewById<EditText>(R.id.et_count) }
-//    private val buttonSave by lazy { findViewById<Button>(R.id.save_button) }
+class ShopItemActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishListener {
 
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
@@ -29,41 +21,23 @@ class ShopItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_shop_item)
-
         parseInten()
-
-        launchRightMode()
-
-//        observeViewModel()
-
-//
+        //нам нужно вызывать метод только при первом запуске
+        //данная проверка показывает, если налл то первый раз
+        //иначе у фрагмента onCreate будет вызываться несколько раз
+        /*
+        раньше, независимо не от чего мы запускали новый фрагмент
+        при этом, при перевороте экрана, если фрагмент уже был добавлен
+        то система его пересоздаст и будет вызван onCreate у фрагмента
+        при этом у активити также будет вызван onCreate который вызовет
+        launchRightMode который вызовет onCreate у фрагмента
+        получается при повороте экрана всегда создавалось 2 фрагмента, один руками другой
+        система
+         */
+        if(savedInstanceState == null) {
+            launchRightMode()
+        }
     }
-//
-//    private fun observeViewModel() {
-//        with(viewModel) {
-//            errorInputName.observe(this@ShopItemActivity) {
-//                val message = if (it) {
-//                    "Error Name"
-//                } else {
-//                    null
-//                }
-//                tilName.error = message
-//            }
-//            errorInputCount.observe(this@ShopItemActivity) {
-//                val message = if (it) {
-//                    "Error Count"
-//                } else {
-//                    null
-//                }
-//                tilCount.error = message
-//            }
-//            shouldCloseScreen.observe(this@ShopItemActivity) {
-//                finish()
-//            }
-//        }
-//    }
-//
-//
     private fun launchRightMode() {
         val fragment = when (screenMode) {
             MODE_EDIT -> ShopItemFragment.newInstanceEditItem(shopItemId)
@@ -72,33 +46,12 @@ class ShopItemActivity : AppCompatActivity() {
         }
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.shop_item_container, fragment)
+            .replace(R.id.shop_item_container, fragment)// возьмет старый фрагмент который там был и заменит на  новый
+            //.add(R.id.shop_item_container, fragment)//метод позволяет создать новый фрагмент, но с предыдущим ничего не делает , он просто добавляет фрагмент
             .commit()
+
     }
-//
-//    private fun launchEditMode() {
-//
-//        with(viewModel) {
-//            getShopItem(shopItemId)
-//            shopItem.observe(this@ShopItemActivity) {
-//                etName.setText(it.name)
-//                etCount.setText(it.count.toString())
-//            }
-//
-//            buttonSave.setOnClickListener {
-//                editShopItem(etName.text?.toString(), etCount.text?.toString())
-//            }
-//        }
-//
-//
-//    }
-//
-//    private fun launchAddMode() {
-//        buttonSave.setOnClickListener {
-//            viewModel.addShopItem(etName.text?.toString(), etCount.text?.toString())
-//        }
-//    }
-//
+
     private fun parseInten() {
         //Если интент не содержит параметра скрин мод, то бросаем исключение
         if (!intent.hasExtra(EXTRA_SCREEN_MODE))
@@ -147,5 +100,9 @@ class ShopItemActivity : AppCompatActivity() {
             return intent
         }
 
+    }
+
+    override fun onEditingFinish() {
+        finish()
     }
 }

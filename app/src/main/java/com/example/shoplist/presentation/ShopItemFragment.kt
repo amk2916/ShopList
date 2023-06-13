@@ -27,11 +27,20 @@ class ShopItemFragment() : Fragment() {
     private lateinit var etCount: EditText
     private lateinit var buttonSave: Button
 
+    private lateinit var onEditingFinishListener: OnEditingFinishListener
+
 
     private var screenMode: String = MODE_UNKNOWN
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
 
-
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if(context is OnEditingFinishListener){
+            onEditingFinishListener = context
+        }else{
+            throw RuntimeException("Activity must implementation OnEditingFinishListener")
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseParam()
@@ -138,7 +147,7 @@ class ShopItemFragment() : Fragment() {
                 tilCount.error = message
             }
             shouldCloseScreen.observe(viewLifecycleOwner) {
-                activity?.onBackPressed()
+                onEditingFinishListener.onEditingFinish()
             }
         }
     }
@@ -175,6 +184,10 @@ class ShopItemFragment() : Fragment() {
         etName = view.findViewById(R.id.et_name)
         etCount = view.findViewById(R.id.et_count)
         buttonSave = view.findViewById(R.id.save_button)
+    }
+
+    interface OnEditingFinishListener{
+        fun onEditingFinish()
     }
 
     companion object {

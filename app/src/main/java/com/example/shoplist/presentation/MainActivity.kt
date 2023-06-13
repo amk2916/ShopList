@@ -1,7 +1,11 @@
 package com.example.shoplist.presentation
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainer
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -10,21 +14,32 @@ import com.example.shoplist.presentation.ShopItemActivity.Companion.newIntentIte
 import com.example.shoplist.presentation.ShopItemActivity.Companion.newIntentItemEdit
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishListener {
 
     private lateinit var viewModel: MainViewModel
 
     private lateinit var shopListAdapter: ShopListAdapter
 
+    private var shopItemContainer: FragmentContainerView? = null
+
     private val floatingActionButton by lazy {
         findViewById<FloatingActionButton>(R.id.button_add_shop_item)
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        /*
+        при клике наэлемент списка, в книжной ореинтации надо отправлять пользователя
+        на ShopItemActivity, а при альбомной создавать фрагмент. Определением в каком
+        положении находится экран занимается , вроде как, система, типа shopItemContainer
+        уществует только в альбомном экране , в ином случае у нее будет null
+         */
+        shopItemContainer = findViewById(R.id.shop_item_containerMA)
 
         setupRecyclerView()
+
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this) {
             //метод ListAdapter вместо установки значения поля, записываем лист так, поле убрали
@@ -32,12 +47,42 @@ class MainActivity : AppCompatActivity() {
             shopListAdapter.submitList(it)
         }
 
+
         floatingActionButton.setOnClickListener {
-            val intent = newIntentItemAdd(this)
-            startActivity(intent)
+            if(isOnePaneMode()){
+                val intent = newIntentItemAdd(this)
+                startActivity(intent)
+            }else{
+                launchFragment(ShopItemFragment.newInstanceAddItem())
+            }
         }
+    }
 
+    override fun onEditingFinish(){
+        Toast.makeText(this,"save success",Toast.LENGTH_SHORT).show()
+        supportFragmentManager.popBackStack()
+    }
 
+    //Проверили, в каком состаянии находится экран, этот параметр не налл
+    //только в альбомной ореинтации
+    private fun isOnePaneMode() : Boolean {
+        return shopItemContainer == null
+    }
+
+    //выполняем установку фрагмента
+    private fun launchFragment(fragment: Fragment){
+        //Метод удалит из BackStack рагмент, а если его там не было , то ничего не сделает
+        //т е перед добавлением нового фрагмента в контейнер, старый будет удален
+        //если этого не сделать фрагменты накладываюься друг на друга в бэкстэк
+        supportFragmentManager.popBackStack()
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.shop_item_containerMA, fragment)
+                //в параметре можно передать ИМЯ или null
+                //в методе popBackStack (передаем это ИМЯ, флаг), в зависимости от
+                // флага переходим либо на фрагмент ИМЯ удаляя все из бэкстека (флаг 0) либо зависит  от флага
+            .addToBackStack(null) //добавляет фрагмент в бэкстэк
+            .commit()
     }
 
     private fun setupRecyclerView() {
@@ -87,9 +132,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         shopListAdapter.onShopItemClickListener = {
-            val intent = newIntentItemEdit(this, it.id)
-            startActivity(intent)
+            if(isOnePaneMode()) {
+                val intent = newIntentItemEdit(this, it.id)
+                startActivity(intent)
+            }else{
+                launchFragment(ShopItemFragment.newInstanceEditItem(it.id))
+            }
         }
+
+
     }
 
     private fun setupLongClickListener() {
@@ -99,3 +150,5 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
+
+
