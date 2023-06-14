@@ -19,7 +19,7 @@ object ShopListRepositoryImpl : ShopListRepository {
 
     //Тестовые данные
     init {
-        for(i in 0.. 1000){
+        for(i in 0.. 15){
             val shopItem = ShopItem(name = "name_$i", count = 1, enabled = Random().nextBoolean())
             addShopItem(shopItem)
         }
