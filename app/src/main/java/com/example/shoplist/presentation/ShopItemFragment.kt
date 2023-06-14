@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Display.Mode
 import android.view.LayoutInflater
 import android.view.View
@@ -35,6 +36,7 @@ class ShopItemFragment() : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        Log.e("onAttach", "Вызван")
         if(context is OnEditingFinishListener){
             onEditingFinishListener = context
         }else{
@@ -43,6 +45,7 @@ class ShopItemFragment() : Fragment() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.e("onCreate", "Вызван")
         parseParam()
     }
     override fun onCreateView(
@@ -50,6 +53,7 @@ class ShopItemFragment() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.e("onCreateView", "Вызван")
         return inflater.inflate(R.layout.fragment_shop_item, container, false)
     }
 
@@ -58,11 +62,47 @@ class ShopItemFragment() : Fragment() {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.e("onViewCreated", "Вызван")
         viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
         initView(view)
         launchRightMode()
         installTextChangedListener()
         observeViewModel()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.e("onStart", "Вызван")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.e("onResume", "Вызван")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.e("onPause", "Вызван")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.e("onStop", "Вызван")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.e("onDestroyView", "Вызван")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.e("onDestroy", "Вызван")
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        Log.e("onDetach", "Вызван")
     }
 
     /*
