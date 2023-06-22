@@ -1,7 +1,11 @@
 package com.example.shoplist.data
 
+import android.app.Application
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
+import com.example.shoplist.data.DateBase.AppDataBase
 import com.example.shoplist.domain.ShopItem
 import com.example.shoplist.domain.ShopListRepository
 import java.lang.RuntimeException
@@ -9,52 +13,37 @@ import java.util.Random
 
 //Логика репозитория
 //для ускорения , делаем пока без БД
-object ShopListRepositoryImpl : ShopListRepository {
+class ShopListRepositoryImpl(
+    val application: Application
+) : ShopListRepository {
 
-    private val shopListLD = MutableLiveData<List<ShopItem>>()
+    private val shopListDao = AppDataBase.getInstance(application).shopListDao()
+    private val mapper = ShopListMapper()
 
-    private val shopList = sortedSetOf<ShopItem>({o1,o2 ->o1.id.compareTo(o2.id)})
-
-    private var autoIncrementId = 0
-
-    //Тестовые данные
-    init {
-        for(i in 0.. 15){
-            val shopItem = ShopItem(name = "name_$i", count = 1, enabled = Random().nextBoolean())
-            addShopItem(shopItem)
-        }
-    }
 
     override fun addShopItem(shopItem: ShopItem) {
-        if(shopItem.id == ShopItem.UNDEFINED_ID) {
-            shopItem.id = autoIncrementId++
-        }
-        shopList.add(shopItem)
-        updateList()
+        shopListDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
     }
 
     override fun deleteShopItem(shopItem: ShopItem) {
-        shopList.remove(shopItem)
-        updateList()
+        shopListDao.deleteShopItem(shopItem.id)
     }
 
     override fun editShopItem(shopItem: ShopItem) {
-        val shopItemOld = getShopItem(shopItem.id)
-        deleteShopItem(shopItemOld)
-        addShopItem(shopItem)
+        shopListDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
     }
 
     override fun getShopItem(shopItemId: Int): ShopItem {
-        return shopList.find {
-            it.id == shopItemId
-        } ?: throw RuntimeException("Element $shopItemId not found")
+        return mapper.mapDbModelToEntity(shopListDao.getShopItem(shopItemId))
     }
 
-    override fun getShopList(): LiveData<List<ShopItem>> {
-        return shopListLD
+    override fun getShopList(): LiveData<List<ShopItem>> = MediatorLiveData<List<ShopItem>>().apply {
+        addSource(shopListDao.getShopList()){
+            mapper.mapListDbModelToListEntity(it)
+        }
     }
-
-    private fun updateList(){
-        shopListLD.value = shopList.toList()
-    }
+//     решение, под капотом которого используется МедиаторЛайвДата
+//    fun alternativeSolutionGetShopList(): LiveData<List<ShopItem>> = shopListDao.getShopList().map {
+//        mapper.mapListDbModelToListEntity(it)
+//    }
 }
