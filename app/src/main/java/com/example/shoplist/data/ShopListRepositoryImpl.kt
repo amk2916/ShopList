@@ -37,13 +37,13 @@ class ShopListRepositoryImpl(
         return mapper.mapDbModelToEntity(shopListDao.getShopItem(shopItemId))
     }
 
-    override fun getShopList(): LiveData<List<ShopItem>> = MediatorLiveData<List<ShopItem>>().apply {
-        addSource(shopListDao.getShopList()){
-            mapper.mapListDbModelToListEntity(it)
-        }
-    }
-//     решение, под капотом которого используется МедиаторЛайвДата
-//    fun alternativeSolutionGetShopList(): LiveData<List<ShopItem>> = shopListDao.getShopList().map {
-//        mapper.mapListDbModelToListEntity(it)
+//    override fun getShopList(): LiveData<List<ShopItem>> = MediatorLiveData<List<ShopItem>>().apply {
+//        addSource(shopListDao.getShopList()){
+//            mapper.mapListDbModelToListEntity(it)
+//        }
 //    }
+//     решение, под капотом которого используется МедиаторЛайвДата
+    override fun getShopList(): LiveData<List<ShopItem>> = shopListDao.getShopList().map {
+        mapper.mapListDbModelToListEntity(it)
+    }
 }

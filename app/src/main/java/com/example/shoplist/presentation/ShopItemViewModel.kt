@@ -1,6 +1,8 @@
 package com.example.shoplist.presentation
 
+import android.app.Application
 import android.content.ClipData.Item
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,7 +13,7 @@ import com.example.shoplist.domain.GetShopItemUseCase
 import com.example.shoplist.domain.ShopItem
 import java.lang.Exception
 
-class ShopItemViewModel : ViewModel() {
+class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
 
     /*
         способ для валидации ввведенных данных
@@ -44,7 +46,7 @@ class ShopItemViewModel : ViewModel() {
     val shouldCloseScreen: LiveData<Unit>
         get() = _shouldCloseScreen
 
-    private val repository = ShopListRepositoryImpl
+    private val repository = ShopListRepositoryImpl(application)
 
     private val addShopItemUseCase = AddShopItemUseCase(repository)
     private val getShopItemUseCase = GetShopItemUseCase(repository)

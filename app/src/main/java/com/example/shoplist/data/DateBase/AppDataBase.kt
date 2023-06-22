@@ -13,7 +13,7 @@ import androidx.room.RoomDatabase
     entities = [
         ShopItemDBModel::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDataBase : RoomDatabase() {
@@ -27,7 +27,7 @@ abstract class AppDataBase : RoomDatabase() {
         //объект  синхронизации
         private val LOCK = Any()
         //имя БД
-        private const val DB_NAME = "shop_item.db"
+        private const val DB_NAME = "shops"
         //проверка существования экземпляра
         fun getInstance(application: Application):AppDataBase{
             INSTANCE?.let{
@@ -45,7 +45,9 @@ abstract class AppDataBase : RoomDatabase() {
                 application,
                 AppDataBase::class.java,
                 DB_NAME
-            ).build()
+            )
+                .allowMainThreadQueries()//инструкция, что на главном потоке выполнять запросы норм
+                .build()
             INSTANCE = db
             return db
         }

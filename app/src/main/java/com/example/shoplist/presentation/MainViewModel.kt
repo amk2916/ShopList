@@ -1,5 +1,7 @@
 package com.example.shoplist.presentation
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.shoplist.data.ShopListRepositoryImpl
@@ -9,9 +11,9 @@ import com.example.shoplist.domain.GetShopListUseCase
 import com.example.shoplist.domain.ShopItem
 
 //Нужен для взаимодействия с Domain слоем
-class MainViewModel : ViewModel(){
+class MainViewModel(application: Application) : AndroidViewModel(application){
     //Для сохранения чистой архитектуры , надо через DI
-    private val repository = ShopListRepositoryImpl
+    private val repository = ShopListRepositoryImpl(application)
 
     private val getShopListUseCase = GetShopListUseCase(repository)
     private val deleteShopItemUseCase = DeleteShopItemUseCase(repository)
@@ -19,6 +21,7 @@ class MainViewModel : ViewModel(){
 
 
     val shopList = getShopListUseCase.getShopList()
+    val a =0
 
     fun deleteShopItem(shopItem: ShopItem){
         deleteShopItemUseCase.deleteShopItem(shopItem)
