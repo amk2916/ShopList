@@ -1,17 +1,24 @@
 package com.example.shoplist.presentation
 
+import android.app.Application
 import android.content.ClipData.Item
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.shoplist.data.ShopListRepositoryImpl
 import com.example.shoplist.domain.AddShopItemUseCase
 import com.example.shoplist.domain.EditShopItemUseCase
 import com.example.shoplist.domain.GetShopItemUseCase
 import com.example.shoplist.domain.ShopItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.lang.Exception
 
-class ShopItemViewModel : ViewModel() {
+class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
 
     /*
         способ для валидации ввведенных данных
@@ -44,11 +51,13 @@ class ShopItemViewModel : ViewModel() {
     val shouldCloseScreen: LiveData<Unit>
         get() = _shouldCloseScreen
 
-    private val repository = ShopListRepositoryImpl
+    private val repository = ShopListRepositoryImpl(application)
 
     private val addShopItemUseCase = AddShopItemUseCase(repository)
     private val getShopItemUseCase = GetShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
+
+
 
     /*
          не можем вернуть shopItem, так как во вью работать с распарсом объекта
@@ -56,25 +65,32 @@ class ShopItemViewModel : ViewModel() {
          чтобы логика оставалась внутри вьюМодели
      */
     fun getShopItem(shopItemId: Int) {
-        val item = getShopItemUseCase.getShopItemById(shopItemId)
-        _shopItem.value = item
+        viewModelScope.launch {
+            val item = getShopItemUseCase.getShopItemById(shopItemId)
+            _shopItem.value = item
+        }
     }
 
     fun addShopItem(inputName: String?, inputCount: String?) {
+
         val name = parseName(inputName)
         val count = parseCount(inputCount)
         val fieldValid = validateInput(name, count)
         if (fieldValid) {
-            val shopItem = ShopItem(name, count, true)
-            addShopItemUseCase.addShopItem(shopItem)
-            /*
+            viewModelScope.launch {
+                val shopItem = ShopItem(name, count, true)
+
+                addShopItemUseCase.addShopItem(shopItem)
+
+                /*
                 метод оповещающий, что экран готов к закрытию
                 можно было бы просто вызвать финиш в активити
                 методы могут работать в другом потококе
                 и появляется вероятность закрыть экран
                 до того как метод завершит свою работу
              */
-            finishWork()
+                finishWork()
+            }
         }
 
     }
@@ -85,9 +101,11 @@ class ShopItemViewModel : ViewModel() {
         val fieldValid = validateInput(name, count)
         if (fieldValid) {
              _shopItem.value?.let {
-                 val item = it.copy(name = name, count = count)
-                 editShopItemUseCase.editShopItem(item)
-                 finishWork()
+                 viewModelScope.launch {
+                     val item = it.copy(name = name, count = count)
+                     editShopItemUseCase.editShopItem(item)
+                     finishWork()
+                 }
              }
         }
     }
@@ -128,4 +146,9 @@ class ShopItemViewModel : ViewModel() {
     fun resetErrorInputCount(){
         _errorInputCount.value = false
     }
+//     для отмены запросов, я так понимаю он вызывается в конце существования вью модели
+//    override fun onCleared() {
+//        super.onCleared()
+//        scope.cancel()
+//    }
 }
