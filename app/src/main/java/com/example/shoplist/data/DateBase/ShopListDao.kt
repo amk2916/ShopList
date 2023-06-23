@@ -9,7 +9,7 @@ import androidx.room.Query
 
 @Dao
 interface ShopListDao {
-
+    //LiveData выполняется и так на другом потоке, suspend ей не надо устанавливать
     @Query("SELECT * FROM shop_items")
     fun getShopList():LiveData<List<ShopItemDBModel>>
 
@@ -20,12 +20,12 @@ interface ShopListDao {
         запись
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addShopItem(shopItemDBModel: ShopItemDBModel)
+    suspend fun addShopItem(shopItemDBModel: ShopItemDBModel)
 
     @Query("delete from shop_items where id = :shopItemId")
-    fun deleteShopItem(shopItemId: Int)
+    suspend fun deleteShopItem(shopItemId: Int)
 
     @Query("select * from shop_items where id = :shopItemId limit 1")
-    fun getShopItem(shopItemId: Int): ShopItemDBModel
+    suspend fun getShopItem(shopItemId: Int): ShopItemDBModel
 
 }

@@ -4,11 +4,17 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.shoplist.data.ShopListRepositoryImpl
 import com.example.shoplist.domain.DeleteShopItemUseCase
 import com.example.shoplist.domain.EditShopItemUseCase
 import com.example.shoplist.domain.GetShopListUseCase
 import com.example.shoplist.domain.ShopItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 //Нужен для взаимодействия с Domain слоем
 class MainViewModel(application: Application) : AndroidViewModel(application){
@@ -19,16 +25,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application){
     private val deleteShopItemUseCase = DeleteShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
 
+   // private val scope = CoroutineScope(Dispatchers.IO)
 
     val shopList = getShopListUseCase.getShopList()
-    val a =0
 
     fun deleteShopItem(shopItem: ShopItem){
-        deleteShopItemUseCase.deleteShopItem(shopItem)
+        viewModelScope.launch {
+            deleteShopItemUseCase.deleteShopItem(shopItem)
+        }
     }
 
     fun changeEnableState(shopItem: ShopItem){
         val shopItemNew = shopItem.copy(enabled = !shopItem.enabled)
-        editShopItemUseCase.editShopItem(shopItemNew)
+        viewModelScope.launch {
+            editShopItemUseCase.editShopItem(shopItemNew)
+        }
     }
 }
