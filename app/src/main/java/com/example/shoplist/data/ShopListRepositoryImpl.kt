@@ -6,19 +6,24 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import com.example.shoplist.data.DateBase.AppDataBase
+import com.example.shoplist.data.DateBase.ShopListDao
 import com.example.shoplist.domain.ShopItem
 import com.example.shoplist.domain.ShopListRepository
 import java.lang.RuntimeException
 import java.util.Random
+import javax.inject.Inject
 
 //Логика репозитория
 //для ускорения , делаем пока без БД
-class ShopListRepositoryImpl(
-    val application: Application
+class ShopListRepositoryImpl @Inject constructor(
+    private val shopListDao: ShopListDao,
+    private val mapper: ShopListMapper
+//    private val application: Application,
+//    private val shopListDao = AppDataBase.getInstance(application).shopListDao(),
+//    private val mapper = ShopListMapper()
 ) : ShopListRepository {
 
-    private val shopListDao = AppDataBase.getInstance(application).shopListDao()
-    private val mapper = ShopListMapper()
+
 
 
     override suspend fun addShopItem(shopItem: ShopItem) {

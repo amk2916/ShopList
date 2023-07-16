@@ -12,9 +12,11 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.shoplist.App
 import com.example.shoplist.R
 import com.example.shoplist.domain.ShopItem
 import com.google.android.material.textfield.TextInputLayout
+import javax.inject.Inject
 
 class ShopItemFragment() : Fragment() {
 
@@ -28,11 +30,18 @@ class ShopItemFragment() : Fragment() {
 
     private lateinit var onEditingFinishListener: OnEditingFinishListener
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val component by lazy{
+        (requireActivity().application as App).component
+    }
 
     private var screenMode: String = MODE_UNKNOWN
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
 
     override fun onAttach(context: Context) {
+        component.inject(this)
         super.onAttach(context)
         Log.e("onAttach", "Вызван")
         if(context is OnEditingFinishListener){
@@ -61,7 +70,7 @@ class ShopItemFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.e("onViewCreated", "Вызван")
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[ShopItemViewModel::class.java]
         initView(view)
         launchRightMode()
         installTextChangedListener()

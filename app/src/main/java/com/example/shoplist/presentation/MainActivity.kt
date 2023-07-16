@@ -1,5 +1,6 @@
 package com.example.shoplist.presentation
 
+import android.app.Application
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -8,10 +9,12 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.shoplist.App
 import com.example.shoplist.R
 import com.example.shoplist.presentation.ShopItemActivity.Companion.newIntentItemAdd
 import com.example.shoplist.presentation.ShopItemActivity.Companion.newIntentItemEdit
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishListener {
 
@@ -21,12 +24,20 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishListen
 
     private var shopItemContainer: FragmentContainerView? = null
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val component by lazy {
+        (application as App).component
+    }
+
     private val floatingActionButton by lazy {
         findViewById<FloatingActionButton>(R.id.button_add_shop_item)
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         /*
@@ -39,7 +50,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishListen
 
         setupRecyclerView()
 
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
         viewModel.shopList.observe(this) {
             //метод ListAdapter вместо установки значения поля, записываем лист так, поле убрали
             //вычисления идут в другом потоке

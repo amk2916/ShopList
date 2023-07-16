@@ -1,18 +1,21 @@
 package com.example.shoplist.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.shoplist.data.ShopListRepositoryImpl
 import com.example.shoplist.domain.AddShopItemUseCase
 import com.example.shoplist.domain.EditShopItemUseCase
 import com.example.shoplist.domain.GetShopItemUseCase
 import com.example.shoplist.domain.ShopItem
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
+class ShopItemViewModel @Inject constructor(
+    private val addShopItemUseCase: AddShopItemUseCase,
+    private val getShopItemUseCase: GetShopItemUseCase,
+    private val editShopItemUseCase: EditShopItemUseCase
+    ) : ViewModel() {
 
     /*
         способ для валидации ввведенных данных
@@ -44,13 +47,6 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
     private val _shouldCloseScreen = MutableLiveData<Unit>()
     val shouldCloseScreen: LiveData<Unit>
         get() = _shouldCloseScreen
-
-    private val repository = ShopListRepositoryImpl(application)
-
-    private val addShopItemUseCase = AddShopItemUseCase(repository)
-    private val getShopItemUseCase = GetShopItemUseCase(repository)
-    private val editShopItemUseCase = EditShopItemUseCase(repository)
-
 
 
     /*
@@ -94,13 +90,13 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         val count = parseCount(inputCount)
         val fieldValid = validateInput(name, count)
         if (fieldValid) {
-             _shopItem.value?.let {
-                 viewModelScope.launch {
-                     val item = it.copy(name = name, count = count)
-                     editShopItemUseCase.editShopItem(item)
-                     finishWork()
-                 }
-             }
+            _shopItem.value?.let {
+                viewModelScope.launch {
+                    val item = it.copy(name = name, count = count)
+                    editShopItemUseCase.editShopItem(item)
+                    finishWork()
+                }
+            }
         }
     }
 
@@ -133,11 +129,11 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         return result
     }
 
-    fun resetErrorInputName(){
+    fun resetErrorInputName() {
         _errorInputName.value = false
     }
 
-    fun resetErrorInputCount(){
+    fun resetErrorInputCount() {
         _errorInputCount.value = false
     }
 //     для отмены запросов, я так понимаю он вызывается в конце существования вью модели
